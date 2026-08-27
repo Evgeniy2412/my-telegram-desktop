@@ -1,4 +1,4 @@
-﻿name: Build Ghostgram (Windows x64)
+name: Build Ghostgram (Windows x64)
 
 on:
   workflow_dispatch:
@@ -151,9 +151,13 @@ jobs:
         run: |
           set OUT=%TBUILD%\%REPO_NAME%\out\Debug
           mkdir artifact
-          if exist %OUT%\Ghostgram.exe copy %OUT%\Ghostgram.exe artifact\
+          if exist %OUT%\Ghostgram.exe copy %OUT%\Ghostgram.exe artifact\Ghostgram.exe
           if exist %OUT%\Telegram.exe copy %OUT%\Telegram.exe artifact\Ghostgram.exe
           if exist %OUT%\Updater.exe copy %OUT%\Updater.exe artifact\
+          mkdir artifact\portable\tdata
+          copy artifact\Ghostgram.exe artifact\portable\
+          if exist artifact\Updater.exe copy artifact\Updater.exe artifact\portable\
+          powershell -Command "Compress-Archive -Path 'artifact\portable\*' -DestinationPath 'artifact\Ghostgram-Portable-x64.zip' -Force"
 
       - name: Upload Ghostgram Binary
         uses: actions/upload-artifact@v7
@@ -161,3 +165,27 @@ jobs:
           name: Ghostgram-Windows-x64
           path: artifact\
           retention-days: 14
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        if: env.UPLOAD_ARTIFACT == 'true'
+        with:
+          files: |
+            artifact/Ghostgram-Portable-x64.zip
+            artifact/Ghostgram.exe
+          tag_name: release-latest
+          name: Ghostgram Latest Build 👻
+          body: |
+            ## 👻 Ghostgram — Готовая сборка
+
+            ### 🔥 Активные функции:
+            - **👻 Полный режим невидимки (Ghost Mode):** скрытие статуса набора текста/записи, невидимый просмотр историй (Stories), скрытное чтение личных сообщений.
+            - **🗑️ Анти-удаление сообщений (Anti-Recall):** сохранение всех удаленных сообщений с пометкой `[удалено]`.
+            - **🔓 Снятие ограничений каналов:** копирование текста и пересылка из защищенных чатов.
+            - **👁️ Обход самоуничтожения медиа:** вечный просмотр и сохранение фото/видео/голосовых с таймером и на 1 просмотр.
+            - **🚫 Полное отключение рекламы** в каналах и ботах.
+            - **🏷️ Фирменный интерфейс:** логотип Ghostgram на верхней панели и отдельное меню настроек `Ghostgram Settings`.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
