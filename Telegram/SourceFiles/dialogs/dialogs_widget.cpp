@@ -2537,37 +2537,11 @@ QPixmap Widget::grabForFolderSlideAnimation() {
 void Widget::checkUpdateStatus() {
 	Expects(!Core::UpdaterDisabled());
 
-	if (_layout == Layout::Child) {
-		return;
-	}
-
-	using Checker = Core::UpdateChecker;
-	if (Checker().state() == Checker::State::Ready) {
-		if (_updateTelegram) {
-			return;
-		}
-		_updateTelegram.create(
-			this,
-			tr::lng_update_telegram(tr::now),
-			st::dialogsUpdateButton,
-			st::dialogsInstallUpdate,
-			st::dialogsInstallUpdateOver,
-			true);
-		_updateTelegram->show();
-		_updateTelegram->setClickedCallback([] {
-			Core::checkReadyUpdate();
-			Core::Restart();
-		});
-		if (_connecting) {
-			_connecting->raise();
-		}
-	} else {
-		if (!_updateTelegram) {
-			return;
-		}
+	if (_updateTelegram) {
 		_updateTelegram.destroy();
+		updateControlsGeometry();
 	}
-	updateControlsGeometry();
+	return;
 }
 
 void Widget::setInnerFocus(bool unfocusSearch) {
