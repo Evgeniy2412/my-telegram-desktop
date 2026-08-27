@@ -570,6 +570,9 @@ void BuildPremiumSection(SectionBuilder &builder) {
 		});
 	}
 
+	builder.addSkip();
+}
+
 void BuildGhostgramSection(SectionBuilder &builder) {
 	const auto controller = builder.controller();
 
@@ -599,6 +602,8 @@ void BuildGhostgramSection(SectionBuilder &builder) {
 		},
 		.keywords = { u"ghost"_q, u"ghostgram"_q, u"mod"_q, u"stealth"_q },
 	});
+
+	builder.addSkip();
 }
 
 void BuildHelpSection(SectionBuilder &builder) {
