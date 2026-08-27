@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "apiwrap.h"
 
+#include "core/ghostgram_settings.h"
 #include "api/api_authorizations.h"
 #include "api/api_attached_stickers.h"
 #include "api/api_blocked_peers.h"
@@ -1445,7 +1446,7 @@ void ApiWrap::markContentsRead(
 		}
 		if (const auto channel = item->history()->peer->asChannel()) {
 			channelMarkedIds[channel].push_back(MTP_int(item->id));
-		} else {
+		} else if (!Ghost::Settings().silentVoiceRead) {
 			markedIds.push_back(MTP_int(item->id));
 		}
 	}
@@ -1466,6 +1467,9 @@ void ApiWrap::markContentsRead(
 
 void ApiWrap::markContentsRead(not_null<HistoryItem*> item) {
 	if (!item->markContentsRead(true) || !item->isRegular()) {
+		return;
+	}
+	if (Ghost::Settings().silentVoiceRead && !item->history()->peer->isChannel()) {
 		return;
 	}
 	const auto ids = MTP_vector<MTPint>(1, MTP_int(item->id));

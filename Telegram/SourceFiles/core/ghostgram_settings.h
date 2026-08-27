@@ -1,4 +1,4 @@
-﻿/*
+/*
 This file is part of Ghostgram.
 */
 #pragma once
@@ -13,6 +13,10 @@ struct Config {
 	bool allowForwarding = true;
 	bool bypassTtl = true;
 	bool blockAds = true;
+	bool silentVoiceRead = true;
+	bool freezeOnline = true;
+	bool fastDownload = true;
+	bool showUserId = true;
 };
 
 inline Config &Settings() {

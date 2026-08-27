@@ -651,6 +651,30 @@ void BuildGhostgramSection(SectionBuilder &builder) {
 		&st::menuIconBlock,
 		cfg.blockAds);
 
+	addToggleRow(
+		u"main/ghost_silent_voice"_q,
+		QString::fromUtf8("Скрытное прослушивание голосовых"),
+		&st::menuIconSoundOn,
+		cfg.silentVoiceRead);
+
+	addToggleRow(
+		u"main/ghost_freeze_online"_q,
+		QString::fromUtf8("Заморозка статуса «В сети»"),
+		&st::menuIconPermissions,
+		cfg.freezeOnline);
+
+	addToggleRow(
+		u"main/ghost_fast_download"_q,
+		QString::fromUtf8("Ускоренная загрузка файлов"),
+		&st::menuIconDownload,
+		cfg.fastDownload);
+
+	addToggleRow(
+		u"main/ghost_show_user_id"_q,
+		QString::fromUtf8("Отображение ID в профиле"),
+		&st::menuIconInfo,
+		cfg.showUserId);
+
 	builder.addSkip();
 }
 
