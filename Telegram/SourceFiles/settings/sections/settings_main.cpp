@@ -570,7 +570,35 @@ void BuildPremiumSection(SectionBuilder &builder) {
 		});
 	}
 
+void BuildGhostgramSection(SectionBuilder &builder) {
+	const auto controller = builder.controller();
+
+	builder.addDivider();
 	builder.addSkip();
+
+	builder.addButton({
+		.id = u"main/ghostgram"_q,
+		.title = rpl::single(QString::fromUtf8("👻 Ghostgram Settings")),
+		.icon = { &st::menuIconShowInChat },
+		.onClick = [=] {
+			controller->show(Ui::MakeInformBox({
+				.text = QString::fromUtf8("🔥 Активные функции Ghostgram:\n\n"
+					"✅ Полный режим невидимки (Ghost Mode)\n"
+					"   • Скрытие статуса набора текста и записи\n"
+					"   • Невидимый просмотр историй (Stories)\n"
+					"   • Скрытное чтение личных сообщений\n\n"
+					"✅ Анти-удаление сообщений (Anti-Recall)\n"
+					"   • Все удаленные сообщения помечаются 🗑️ [удалено]\n\n"
+					"✅ Обход ограничений каналов\n"
+					"   • Копирование и пересылка из защищенных чатов\n\n"
+					"✅ Обход самоуничтожения медиа\n"
+					"   • Вечный просмотр фото, видео и голосовых\n\n"
+					"✅ Полное отключение рекламы"),
+				.title = QString::fromUtf8("👻 Ghostgram v7.1.2"),
+			}));
+		},
+		.keywords = { u"ghost"_q, u"ghostgram"_q, u"mod"_q, u"stealth"_q },
+	});
 }
 
 void BuildHelpSection(SectionBuilder &builder) {
@@ -720,6 +748,7 @@ void Main::setupContent() {
 		BuildSectionButtons(builder);
 		builder.addSkip();
 		BuildInterfaceScale(builder);
+		BuildGhostgramSection(builder);
 		BuildPremiumSection(builder);
 		BuildHelpSection(builder);
 

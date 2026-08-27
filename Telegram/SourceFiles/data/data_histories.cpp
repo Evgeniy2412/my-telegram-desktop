@@ -746,6 +746,9 @@ void Histories::sendReadRequest(not_null<History*> history, State &state) {
 				channel->inputChannel(),
 				MTP_int(tillId)
 			)).done(finished).fail(finished).send();
+		} else if (history->peer->isUser() && !history->peer->asUser()->isSelf()) {
+			finished();
+			return 0;
 		} else {
 			return session().api().request(MTPmessages_ReadHistory(
 				history->peer->input(),
