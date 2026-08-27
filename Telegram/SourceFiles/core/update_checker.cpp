@@ -1466,14 +1466,7 @@ void Updater::stop() {
 }
 
 void Updater::start(bool forceWait) {
-	if (cExeName().isEmpty()) {
-		return;
-	}
-
-	_timer.cancel();
-	if (!cAutoUpdate() || _action != Action::Waiting) {
-		return;
-	}
+	return;
 
 	_retryTimer.cancel();
 	const auto constDelay = cAlphaVersion() ? 600 : UpdateDelayConstPart;
