@@ -1391,12 +1391,32 @@ void Stories::toggleHidden(
 	}
 }
 
+#include "core/ghostgram_settings.h"
+
 void Stories::sendMarkAsReadRequest(
 		not_null<PeerData*> peer,
 		StoryId tillId) {
 	const auto peerId = peer->id;
-	_markReadPending.remove(peerId);
-	_markReadRequests.remove(peerId);
+	if (Ghost::Settings().stealthStories) {
+		_markReadPending.remove(peerId);
+		_markReadRequests.remove(peerId);
+		return;
+	}
+	_markReadRequests.emplace(peerId);
+	const auto finish = [=] {
+		_markReadRequests.remove(peerId);
+		if (!_markReadTimer.isActive()
+			&& _markReadPending.contains(peerId)) {
+			sendMarkAsReadRequests();
+		}
+		checkQuitPreventFinished();
+	};
+
+	const auto api = &_owner->session().api();
+	api->request(MTPstories_ReadStories(
+		peer->input(),
+		MTP_int(tillId)
+	)).done(finish).fail(finish).send();
 }
 
 void Stories::checkQuitPreventFinished() {

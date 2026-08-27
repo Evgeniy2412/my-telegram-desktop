@@ -73,6 +73,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/toast/toast.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
+#include "ui/widgets/checkbox.h"
+#include "core/ghostgram_settings.h"
 #include "ui/widgets/continuous_sliders.h"
 #include "ui/widgets/menu/menu_add_action_callback.h"
 #include "ui/widgets/menu/menu_item_base.h"
@@ -584,20 +586,34 @@ void BuildGhostgramSection(SectionBuilder &builder) {
 		.title = rpl::single(QString::fromUtf8("👻 Ghostgram Settings")),
 		.icon = { &st::menuIconShowInChat },
 		.onClick = [=] {
-			controller->show(Ui::MakeInformBox({
-				.text = QString::fromUtf8("🔥 Активные функции Ghostgram:\n\n"
-					"✅ Полный режим невидимки (Ghost Mode)\n"
-					"   • Скрытие статуса набора текста и записи\n"
-					"   • Невидимый просмотр историй (Stories)\n"
-					"   • Скрытное чтение личных сообщений\n\n"
-					"✅ Анти-удаление сообщений (Anti-Recall)\n"
-					"   • Все удаленные сообщения помечаются 🗑️ [удалено]\n\n"
-					"✅ Обход ограничений каналов\n"
-					"   • Копирование и пересылка из защищенных чатов\n\n"
-					"✅ Обход самоуничтожения медиа\n"
-					"   • Вечный просмотр фото, видео и голосовых\n\n"
-					"✅ Полное отключение рекламы"),
-				.title = QString::fromUtf8("👻 Ghostgram v7.1.2"),
+			controller->show(Box([=](not_null<Ui::GenericBox*> box) {
+				box->setTitle(QString::fromUtf8("👻 Ghostgram Settings"));
+
+				auto &cfg = Ghost::Settings();
+
+				const auto addOption = [&](const QString &label, bool &setting) {
+					box->addRow(
+						object_ptr<Ui::Checkbox>(
+							box,
+							label,
+							setting,
+							st::defaultBoxCheckbox),
+						st::boxOptionListPadding
+					)->checkedChanges(
+					) | rpl::start_with_next([&setting](bool checked) {
+						setting = checked;
+					}, box->lifetime());
+				};
+
+				addOption(QString::fromUtf8("Анти-удаление сообщений (Anti-Recall)"), cfg.antiRecall);
+				addOption(QString::fromUtf8("Скрывать статус «печатает...» (Ghost Typing)"), cfg.hideTyping);
+				addOption(QString::fromUtf8("Скрытное чтение личных сообщений (Ghost Read)"), cfg.silentRead);
+				addOption(QString::fromUtf8("Невидимый просмотр историй (Ghost Stories)"), cfg.stealthStories);
+				addOption(QString::fromUtf8("Снятие ограничений каналов (No-Forwards)"), cfg.allowForwarding);
+				addOption(QString::fromUtf8("Обход самоуничтожения медиа и таймеров"), cfg.bypassTtl);
+				addOption(QString::fromUtf8("Блокировка рекламы в каналах"), cfg.blockAds);
+
+				box->addButton(tr::lng_box_ok(), [=] { box->closeBox(); });
 			}));
 		},
 		.keywords = { u"ghost"_q, u"ghostgram"_q, u"mod"_q, u"stealth"_q },

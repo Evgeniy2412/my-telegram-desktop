@@ -151,8 +151,19 @@ void SendProgressManager::send(const Key &key, int progress) {
 	}
 }
 
+#include "core/ghostgram_settings.h"
+
 bool SendProgressManager::skipRequest(const Key &key) const {
-	return true;
+	if (Ghost::Settings().hideTyping) {
+		return true;
+	}
+	const auto user = key.history->peer->asUser();
+	if (!user) {
+		return false;
+	} else if (user->isSelf()) {
+		return true;
+	}
+	return false;
 }
 
 void SendProgressManager::done(mtpRequestId requestId) {

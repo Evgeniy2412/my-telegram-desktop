@@ -511,15 +511,6 @@ void TopBarWidget::paintEvent(QPaintEvent *e) {
 	const auto slidingTop = std::max(selectedButtonsTop, searchFieldTop);
 
 	p.fillRect(QRect(0, 0, width(), st::topBarHeight), st::topBarBg);
-	{
-		p.setFont(st::semiboldFont);
-		p.setPen(st::windowSubTextFg);
-		const auto brandText = QString::fromUtf8("👻 Ghostgram");
-		const auto textW = st::semiboldFont->width(brandText);
-		const auto textX = (width() - textW) / 2;
-		const auto textY = (st::topBarHeight - st::semiboldFont->height) / 2 + st::semiboldFont->ascent;
-		p.drawText(textX, textY, brandText);
-	}
 	if (slidingTop < 0) {
 		p.translate(0, slidingTop + st::topBarHeight);
 		paintTopBar(p);

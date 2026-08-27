@@ -1733,8 +1733,20 @@ void PeerData::processTopics(const MTPVector<MTPForumTopic> &topics) {
 	}
 }
 
+#include "core/ghostgram_settings.h"
+
 bool PeerData::allowsForwarding() const {
-	return true;
+	if (Ghost::Settings().allowForwarding) {
+		return true;
+	}
+	if (const auto user = asUser()) {
+		return user->allowsForwarding();
+	} else if (const auto channel = asChannel()) {
+		return channel->allowsForwarding();
+	} else if (const auto chat = asChat()) {
+		return chat->allowsForwarding();
+	}
+	return false;
 }
 
 Data::RestrictionCheckResult PeerData::amRestricted(

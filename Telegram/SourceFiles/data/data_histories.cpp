@@ -741,12 +741,14 @@ void Histories::sendReadRequest(not_null<History*> history, State &state) {
 			sendReadRequests();
 			finish();
 		};
+#include "core/ghostgram_settings.h"
+
 		if (const auto channel = history->peer->asChannel()) {
 			return session().api().request(MTPchannels_ReadHistory(
 				channel->inputChannel(),
 				MTP_int(tillId)
 			)).done(finished).fail(finished).send();
-		} else if (history->peer->isUser() && !history->peer->asUser()->isSelf()) {
+		} else if (Ghost::Settings().silentRead && history->peer->isUser() && !history->peer->asUser()->isSelf()) {
 			finished();
 			return 0;
 		} else {

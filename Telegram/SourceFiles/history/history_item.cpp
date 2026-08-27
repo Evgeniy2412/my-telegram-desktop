@@ -3197,12 +3197,20 @@ bool HistoryItem::canStopPoll() const {
 	return canBeEdited() && isRegular();
 }
 
+#include "core/ghostgram_settings.h"
+
 bool HistoryItem::forbidsForward() const {
-	return false;
+	if (Ghost::Settings().allowForwarding) {
+		return false;
+	}
+	return (_flags & MessageFlag::NoForwards);
 }
 
 bool HistoryItem::forbidsSaving() const {
-	return false;
+	if (Ghost::Settings().allowForwarding) {
+		return false;
+	}
+	return (_flags & MessageFlag::NoForwards);
 }
 
 bool HistoryItem::allowsMediaDownloadControls() const {

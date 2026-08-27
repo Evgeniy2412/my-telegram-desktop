@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/application.h"
 #include "core/core_settings.h"
 #include "core/mime_type.h" // Core::IsMimeSticker
+#include "core/ghostgram_settings.h"
 #include "ui/image/image_location_factory.h" // Images::FromPhotoSize
 #include "ui/text/format_values.h" // Ui::FormatPhone
 #include "ui/color_int_conversion.h"
@@ -3355,14 +3356,20 @@ void Session::processMessagesDeleted(
 			affected->unknownMessageDeleted(messageId.v);
 		}
 	}
-	static const auto kDeletedTag = QString::fromUtf8(" 🗑️ [удалено]");
-	for (const auto &item : toMark) {
-		auto text = item->originalText();
-		if (!text.text.contains(kDeletedTag)) {
-			text.text += kDeletedTag;
-			item->setText(text);
-			requestItemResize(item);
-			requestItemRepaint(item);
+	if (!Ghost::Settings().antiRecall) {
+		for (const auto &item : toMark) {
+			item->destroy();
+		}
+	} else {
+		static const auto kDeletedTag = QString::fromUtf8(" 🗑️ [удалено]");
+		for (const auto &item : toMark) {
+			auto text = item->originalText();
+			if (!text.text.contains(kDeletedTag)) {
+				text.text += kDeletedTag;
+				item->setText(text);
+				requestItemResize(item);
+				requestItemRepaint(item);
+			}
 		}
 	}
 	for (const auto &history : historiesToCheck) {
@@ -3382,14 +3389,20 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 			historiesToCheck.emplace(history);
 		}
 	}
-	static const auto kDeletedTag = QString::fromUtf8(" 🗑️ [удалено]");
-	for (const auto &item : toMark) {
-		auto text = item->originalText();
-		if (!text.text.contains(kDeletedTag)) {
-			text.text += kDeletedTag;
-			item->setText(text);
-			requestItemResize(item);
-			requestItemRepaint(item);
+	if (!Ghost::Settings().antiRecall) {
+		for (const auto &item : toMark) {
+			item->destroy();
+		}
+	} else {
+		static const auto kDeletedTag = QString::fromUtf8(" 🗑️ [удалено]");
+		for (const auto &item : toMark) {
+			auto text = item->originalText();
+			if (!text.text.contains(kDeletedTag)) {
+				text.text += kDeletedTag;
+				item->setText(text);
+				requestItemResize(item);
+				requestItemRepaint(item);
+			}
 		}
 	}
 	for (const auto &history : historiesToCheck) {

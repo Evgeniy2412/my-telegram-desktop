@@ -861,7 +861,8 @@ void MainWindow::updateTitle() {
 		: Dialogs::Key();
 	const auto thread = key ? key.thread() : nullptr;
 	if (!thread) {
-		setTitle((user.isEmpty() ? u"Telegram"_q : user) + added);
+		const auto appTitle = user.isEmpty() ? u"Ghostgram"_q : (u"Ghostgram - "_q + user);
+		setTitle(appTitle + added);
 		return;
 	}
 	const auto history = thread->owningHistory();
@@ -881,7 +882,7 @@ void MainWindow::updateTitle() {
 		: !added.isEmpty()
 		? u" \u2013"_q
 		: QString();
-	setTitle(primary + middle + added);
+	setTitle(u"Ghostgram - "_q + primary + middle + added);
 }
 
 QRect MainWindow::computeDesktopRect() const {

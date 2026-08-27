@@ -301,12 +301,24 @@ HistoryItem *SponsoredMessages::injectItem(
 	return entryIt->item.get();
 }
 
+#include "core/ghostgram_settings.h"
+
 bool SponsoredMessages::canHaveFor(not_null<History*> history) const {
+	if (Ghost::Settings().blockAds) {
+		return false;
+	}
+	const auto peer = history->peer;
+	if (const auto channel = peer->asChannel()) {
+		return channel->isBroadcast();
+	}
 	return false;
 }
 
 bool SponsoredMessages::canHaveFor(not_null<HistoryItem*> item) const {
-	return false;
+	if (Ghost::Settings().blockAds) {
+		return false;
+	}
+	return canHaveFor(item->history());
 }
 
 bool SponsoredMessages::isTopBarFor(not_null<History*> history) const {
