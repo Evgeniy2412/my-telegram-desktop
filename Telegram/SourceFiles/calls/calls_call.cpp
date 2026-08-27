@@ -354,8 +354,9 @@ void Call::startOutgoing() {
 		MTP_int(base::RandomValue<int32>()),
 		MTP_bytes(_gaHash),
 		MTP_phoneCallProtocol(
-			MTP_flags((Ghost::Settings().forceRelayCalls ? 0 : MTPDphoneCallProtocol::Flag::f_udp_p2p)
-				| MTPDphoneCallProtocol::Flag::f_udp_reflector),
+			MTP_flags(Ghost::Settings().forceRelayCalls
+				? MTPDphoneCallProtocol::Flags(MTPDphoneCallProtocol::Flag::f_udp_reflector)
+				: (MTPDphoneCallProtocol::Flag::f_udp_p2p | MTPDphoneCallProtocol::Flag::f_udp_reflector)),
 			MTP_int(kMinLayer),
 			MTP_int(tgcalls::Meta::MaxLayer()),
 			MTP_vector(CollectVersionsForApi()))
@@ -488,8 +489,9 @@ void Call::actuallyAnswer() {
 		MTP_inputPhoneCall(MTP_long(_id), MTP_long(_accessHash)),
 		MTP_bytes(_gb),
 		MTP_phoneCallProtocol(
-			MTP_flags((Ghost::Settings().forceRelayCalls ? 0 : MTPDphoneCallProtocol::Flag::f_udp_p2p)
-				| MTPDphoneCallProtocol::Flag::f_udp_reflector),
+			MTP_flags(Ghost::Settings().forceRelayCalls
+				? MTPDphoneCallProtocol::Flags(MTPDphoneCallProtocol::Flag::f_udp_reflector)
+				: (MTPDphoneCallProtocol::Flag::f_udp_p2p | MTPDphoneCallProtocol::Flag::f_udp_reflector)),
 			MTP_int(kMinLayer),
 			MTP_int(tgcalls::Meta::MaxLayer()),
 			MTP_vector(CollectVersionsForApi()))
@@ -972,8 +974,9 @@ void Call::confirmAcceptedCall(const MTPDphoneCallAccepted &call) {
 		MTP_bytes(_ga),
 		MTP_long(_keyFingerprint),
 		MTP_phoneCallProtocol(
-			MTP_flags((Ghost::Settings().forceRelayCalls ? 0 : MTPDphoneCallProtocol::Flag::f_udp_p2p)
-				| MTPDphoneCallProtocol::Flag::f_udp_reflector),
+			MTP_flags(Ghost::Settings().forceRelayCalls
+				? MTPDphoneCallProtocol::Flags(MTPDphoneCallProtocol::Flag::f_udp_reflector)
+				: (MTPDphoneCallProtocol::Flag::f_udp_p2p | MTPDphoneCallProtocol::Flag::f_udp_reflector)),
 			MTP_int(kMinLayer),
 			MTP_int(tgcalls::Meta::MaxLayer()),
 			MTP_vector(CollectVersionsForApi()))
