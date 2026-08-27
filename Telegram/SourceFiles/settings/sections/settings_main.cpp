@@ -592,15 +592,15 @@ void BuildGhostgramSection(SectionBuilder &builder) {
 				auto &cfg = Ghost::Settings();
 
 				const auto addOption = [&](const QString &label, bool &setting) {
-					box->addRow(
+					const auto checkbox = box->addRow(
 						object_ptr<Ui::Checkbox>(
 							box,
 							label,
 							setting,
 							st::defaultBoxCheckbox),
-						st::boxOptionListPadding
-					)->checkedChanges(
-					) | rpl::start_with_next([&setting](bool checked) {
+						st::boxOptionListPadding);
+					checkbox->checkedChanges(
+					) | rpl::on_next([&setting](bool checked) {
 						setting = checked;
 					}, box->lifetime());
 				};
