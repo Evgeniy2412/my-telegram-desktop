@@ -3360,7 +3360,7 @@ void Session::processMessagesDeleted(
 		auto text = item->originalText();
 		if (!text.text.contains(kDeletedTag)) {
 			text.text += kDeletedTag;
-			item->setTextValue(text);
+			item->setText(text);
 			requestItemResize(item);
 			requestItemRepaint(item);
 		}
@@ -3387,7 +3387,7 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 		auto text = item->originalText();
 		if (!text.text.contains(kDeletedTag)) {
 			text.text += kDeletedTag;
-			item->setTextValue(text);
+			item->setText(text);
 			requestItemResize(item);
 			requestItemRepaint(item);
 		}
