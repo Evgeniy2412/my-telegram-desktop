@@ -728,7 +728,7 @@ rpl::producer<BadgeType> BadgeValueFromFlags(Peer peer) {
 			? BadgeType::Fake
 			: peer->isMonoforum()
 			? BadgeType::Direct
-			: (value & Flag::Verified)
+			: (peer->isVerified() || (value & Flag::Verified))
 			? BadgeType::Verified
 			: premium
 			? BadgeType::Premium

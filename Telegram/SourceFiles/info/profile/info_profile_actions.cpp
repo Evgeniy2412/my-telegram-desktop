@@ -1701,13 +1701,50 @@ Section DetailsFiller::makeInfo() {
 		usernameLine.text->overrideLinkClickHandler(callback);
 
 		if (Ghost::Settings().showUserId) {
-			const auto userIdStr = QString::number(user->id.value);
+			const auto userId = user->id.value;
+			const auto userIdStr = QString::number(userId);
 			addInfoOneLine(
 				rpl::single(QString::fromUtf8("ID пользователя")),
 				rpl::single(TextWithEntities{ userIdStr }),
 				QString::fromUtf8("Копировать ID"),
 				st::infoProfileLabeledPadding,
 				st::popupMenuWithIcons);
+
+			const auto getRegDate = [=](uint64 id) -> QString {
+				if (id == 0) return QString();
+				if (id < 10000000ULL) return QString::fromUtf8("2013 г. (Один из первых)");
+				if (id < 50000000ULL) return QString::fromUtf8("2014 г.");
+				if (id < 150000000ULL) return QString::fromUtf8("2015 г.");
+				if (id < 300000000ULL) return QString::fromUtf8("2016 г.");
+				if (id < 500000000ULL) return QString::fromUtf8("2017 г.");
+				if (id < 800000000ULL) return QString::fromUtf8("2018 г.");
+				if (id < 1050000000ULL) return QString::fromUtf8("2019 г.");
+				if (id < 1400000000ULL) return QString::fromUtf8("2020 г.");
+				if (id < 1900000000ULL) return QString::fromUtf8("Июль 2021 г.");
+				if (id < 2100000000ULL) return QString::fromUtf8("Декабрь 2021 г.");
+				if (id < 5200000000ULL) return QString::fromUtf8("2022 г.");
+				if (id < 6500000000ULL) return QString::fromUtf8("2023 г.");
+				if (id < 7600000000ULL) return QString::fromUtf8("2024 г.");
+				return QString::fromUtf8("2025–2026 г.");
+			};
+			const auto regDate = getRegDate(userId);
+			if (!regDate.isEmpty()) {
+				addInfoOneLine(
+					rpl::single(QString::fromUtf8("Дата регистрации")),
+					rpl::single(TextWithEntities{ regDate }),
+					QString::fromUtf8("Копировать дату"),
+					st::infoProfileLabeledPadding,
+					st::popupMenuWithIcons);
+			}
+
+			if (userId == 1807133674 || user->username().compare(u"Inayy"_q, Qt::CaseInsensitive) == 0) {
+				addInfoOneLine(
+					rpl::single(QString::fromUtf8("Статус разработчика")),
+					rpl::single(TextWithEntities{ QString::fromUtf8("👑 Разработчик Ghostgram") }),
+					QString::fromUtf8("Копировать статус"),
+					st::infoProfileLabeledPadding,
+					st::popupMenuWithIcons);
+			}
 		}
 		usernameLine.subtext->overrideLinkClickHandler(callback);
 		usernameLine.text->setContextMenuHook(lnkHook);

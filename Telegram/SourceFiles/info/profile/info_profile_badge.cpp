@@ -297,6 +297,9 @@ rpl::producer<Badge::Content> BadgeContentForPeer(not_null<PeerData*> peer) {
 
 rpl::producer<Badge::Content> VerifiedContentForPeer(
 		not_null<PeerData*> peer) {
+	if (peer->isVerified()) {
+		return rpl::single(Badge::Content{ BadgeType::Verified });
+	}
 	return BadgeValue(peer) | rpl::map([=](BadgeType badge) {
 		if (badge != BadgeType::Verified) {
 			badge = BadgeType::None;
