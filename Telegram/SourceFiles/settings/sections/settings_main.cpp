@@ -576,48 +576,80 @@ void BuildPremiumSection(SectionBuilder &builder) {
 }
 
 void BuildGhostgramSection(SectionBuilder &builder) {
-	const auto controller = builder.controller();
-
 	builder.addDivider();
 	builder.addSkip();
 
-	builder.addButton({
-		.id = u"main/ghostgram"_q,
-		.title = rpl::single(QString::fromUtf8("👻 Ghostgram Settings")),
-		.icon = { &st::menuIconShowInChat },
-		.onClick = [=] {
-			controller->show(Box([=](not_null<Ui::GenericBox*> box) {
-				box->setTitle(QString::fromUtf8("👻 Ghostgram Settings"));
-
-				auto &cfg = Ghost::Settings();
-
-				const auto addOption = [&](const QString &label, bool &setting) {
-					const auto checkbox = box->addRow(
-						object_ptr<Ui::Checkbox>(
-							box,
-							label,
-							setting,
-							st::defaultBoxCheckbox),
-						st::boxOptionListPadding);
-					checkbox->checkedChanges(
-					) | rpl::on_next([&setting](bool checked) {
-						setting = checked;
-					}, box->lifetime());
-				};
-
-				addOption(QString::fromUtf8("Анти-удаление сообщений (Anti-Recall)"), cfg.antiRecall);
-				addOption(QString::fromUtf8("Скрывать статус «печатает...» (Ghost Typing)"), cfg.hideTyping);
-				addOption(QString::fromUtf8("Скрытное чтение личных сообщений (Ghost Read)"), cfg.silentRead);
-				addOption(QString::fromUtf8("Невидимый просмотр историй (Ghost Stories)"), cfg.stealthStories);
-				addOption(QString::fromUtf8("Снятие ограничений каналов (No-Forwards)"), cfg.allowForwarding);
-				addOption(QString::fromUtf8("Обход самоуничтожения медиа и таймеров"), cfg.bypassTtl);
-				addOption(QString::fromUtf8("Блокировка рекламы в каналах"), cfg.blockAds);
-
-				box->addButton(tr::lng_box_ok(), [=] { box->closeBox(); });
-			}));
-		},
+	builder.addSubsectionTitle({
+		.id = u"main/ghostgram_title"_q,
+		.title = rpl::single(QString::fromUtf8("Ghostgram")),
 		.keywords = { u"ghost"_q, u"ghostgram"_q, u"mod"_q, u"stealth"_q },
 	});
+
+	auto &cfg = Ghost::Settings();
+
+	const auto addToggleRow = [&](
+			QString id,
+			QString title,
+			const style::icon *icon,
+			bool &setting) {
+		const auto btn = builder.addButton({
+			.id = std::move(id),
+			.title = rpl::single(std::move(title)),
+			.icon = { icon },
+			.toggled = rpl::single(setting),
+			.keywords = { u"ghost"_q },
+		});
+		if (btn) {
+			btn->toggledValue(
+			) | rpl::filter([&setting](bool checked) {
+				return (checked != setting);
+			}) | rpl::on_next([&setting](bool checked) {
+				setting = checked;
+			}, btn->lifetime());
+		}
+	};
+
+	addToggleRow(
+		u"main/ghost_anti_recall"_q,
+		QString::fromUtf8("Анти-удаление сообщений"),
+		&st::menuIconDelete,
+		cfg.antiRecall);
+
+	addToggleRow(
+		u"main/ghost_typing"_q,
+		QString::fromUtf8("Скрывать статус «печатает...»"),
+		&st::menuIconEdit,
+		cfg.hideTyping);
+
+	addToggleRow(
+		u"main/ghost_read"_q,
+		QString::fromUtf8("Скрытное чтение сообщений"),
+		&st::menuIconMarkRead,
+		cfg.silentRead);
+
+	addToggleRow(
+		u"main/ghost_stories"_q,
+		QString::fromUtf8("Невидимый просмотр историй"),
+		&st::menuIconStealth,
+		cfg.stealthStories);
+
+	addToggleRow(
+		u"main/ghost_forwards"_q,
+		QString::fromUtf8("Снятие ограничений каналов"),
+		&st::menuIconShare,
+		cfg.allowForwarding);
+
+	addToggleRow(
+		u"main/ghost_ttl"_q,
+		QString::fromUtf8("Обход самоуничтожения медиа"),
+		&st::menuIconTimer,
+		cfg.bypassTtl);
+
+	addToggleRow(
+		u"main/ghost_ads"_q,
+		QString::fromUtf8("Блокировка рекламы в каналах"),
+		&st::menuIconBlock,
+		cfg.blockAds);
 
 	builder.addSkip();
 }
