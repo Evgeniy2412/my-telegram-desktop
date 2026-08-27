@@ -3343,22 +3343,26 @@ void Session::processMessagesDeleted(
 		return;
 	}
 
-	auto toDestroy = std::vector<not_null<HistoryItem*>>();
+	auto toMark = std::vector<not_null<HistoryItem*>>();
 	auto historiesToCheck = base::flat_set<not_null<History*>>();
 	for (const auto &messageId : data) {
 		const auto i = list ? list->find(messageId.v) : Messages::iterator();
 		if (list && i != list->end()) {
 			const auto history = i->second->history();
-			toDestroy.push_back(i->second);
+			toMark.push_back(i->second);
 			historiesToCheck.emplace(history);
 		} else if (affected) {
 			affected->unknownMessageDeleted(messageId.v);
 		}
 	}
-	if (!toDestroy.empty()) {
-		notifyItemsAboutToBeDestroyed(toDestroy);
-		for (const auto &item : toDestroy) {
-			item->destroy();
+	static const auto kDeletedTag = QString::fromUtf8(" 🗑️ [удалено]");
+	for (const auto &item : toMark) {
+		auto text = item->originalText();
+		if (!text.text.contains(kDeletedTag)) {
+			text.text += kDeletedTag;
+			item->setTextValue(text);
+			requestItemResize(item);
+			requestItemRepaint(item);
 		}
 	}
 	for (const auto &history : historiesToCheck) {
@@ -3369,19 +3373,23 @@ void Session::processMessagesDeleted(
 }
 
 void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
-	auto toDestroy = std::vector<not_null<HistoryItem*>>();
+	auto toMark = std::vector<not_null<HistoryItem*>>();
 	auto historiesToCheck = base::flat_set<not_null<History*>>();
 	for (const auto &messageId : data) {
 		if (const auto item = nonChannelMessage(messageId.v)) {
 			const auto history = item->history();
-			toDestroy.push_back(item);
+			toMark.push_back(item);
 			historiesToCheck.emplace(history);
 		}
 	}
-	if (!toDestroy.empty()) {
-		notifyItemsAboutToBeDestroyed(toDestroy);
-		for (const auto &item : toDestroy) {
-			item->destroy();
+	static const auto kDeletedTag = QString::fromUtf8(" 🗑️ [удалено]");
+	for (const auto &item : toMark) {
+		auto text = item->originalText();
+		if (!text.text.contains(kDeletedTag)) {
+			text.text += kDeletedTag;
+			item->setTextValue(text);
+			requestItemResize(item);
+			requestItemRepaint(item);
 		}
 	}
 	for (const auto &history : historiesToCheck) {

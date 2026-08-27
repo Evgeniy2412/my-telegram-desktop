@@ -1824,14 +1824,6 @@ bool HistoryItem::isIncomingUnreadMedia() const {
 }
 
 bool HistoryItem::isTtlCoveredMedia() const {
-	const auto media = _media.get();
-	if (!media || !media->ttlSeconds()) {
-		return false;
-	} else if (media->photo()) {
-		return true;
-	} else if (const auto document = media->document()) {
-		return document->isVideoFile();
-	}
 	return false;
 }
 
@@ -2840,38 +2832,6 @@ void HistoryItem::contributeToSlowmode(TimeId realDate) {
 }
 
 void HistoryItem::clearMediaAsExpired() {
-	const auto media = this->media();
-	if (!media || !media->ttlSeconds()) {
-		return;
-	}
-	unarmMediaDestroy();
-	auto &owner = _history->owner();
-	if (const auto document = media->document()) {
-		document->cancel();
-		if (const auto active = document->activeMediaView()) {
-			active->setBytes(QByteArray());
-		}
-		owner.cache().remove(document->cacheKey());
-		owner.cache().remove(document->goodThumbnailCacheKey());
-
-		applyEditionToHistoryCleared();
-		auto text = (document->isVideoFile()
-			? tr::lng_ttl_video_expired
-			: document->isVoiceMessage()
-			? tr::lng_ttl_voice_expired
-			: document->isVideoMessage()
-			? tr::lng_ttl_round_expired
-			: tr::lng_message_empty)(tr::now, tr::marked);
-		updateServiceText({ std::move(text) });
-		_flags |= MessageFlag::ReactionsAllowed;
-	} else if (const auto photo = media->photo()) {
-		applyEditionToHistoryCleared();
-		photo->clearLocalCache();
-		updateServiceText({
-			tr::lng_ttl_photo_expired(tr::now, tr::marked)
-		});
-		_flags |= MessageFlag::ReactionsAllowed;
-	}
 }
 
 void HistoryItem::addToUnreadThings(HistoryUnreadThings::AddType type) {
@@ -8139,23 +8099,6 @@ void HistoryItem::unarmMediaDestroy() {
 }
 
 void HistoryItem::applyMediaContentsRead(TimeId readDate) {
-	const auto media = _media.get();
-	const auto ttl = media ? TimeId(media->ttlSeconds()) : TimeId();
-	if (ttl <= 0) {
-		return;
-	}
-	const auto now = base::unixtime::now();
-	if (media->ttlSecondsSingleView() || !readDate || readDate + ttl <= now) {
-		clearMediaAsExpired();
-	} else {
-		AddComponents(HistoryServiceSelfDestruct::Bit());
-		const auto selfdestruct = Get<HistoryServiceSelfDestruct>();
-		selfdestruct->timeToLive = ttl;
-		selfdestruct->type = media->document()
-			? HistoryServiceSelfDestruct::Type::Video
-			: HistoryServiceSelfDestruct::Type::Photo;
-		armMediaDestroy(readDate + ttl);
-	}
 }
 
 PreparedServiceText HistoryItem::prepareInvitedToCallText(
