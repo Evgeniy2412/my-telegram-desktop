@@ -17,6 +17,9 @@ struct Config {
 	bool freezeOnline = true;
 	bool fastDownload = true;
 	bool showUserId = true;
+	bool stripExif = true;
+	bool forceRelayCalls = true;
+	bool npuTheme = true;
 };
 
 inline Config &Settings() {

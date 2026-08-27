@@ -860,8 +860,11 @@ void MainWindow::updateTitle() {
 		? session->activeChatCurrent()
 		: Dialogs::Key();
 	const auto thread = key ? key.thread() : nullptr;
+	const auto prefix = Ghost::Settings().npuTheme
+		? u"⚡ NPU | Ghostgram Secure Edition"_q
+		: u"Ghostgram"_q;
 	if (!thread) {
-		const auto appTitle = user.isEmpty() ? u"Ghostgram"_q : (u"Ghostgram - "_q + user);
+		const auto appTitle = user.isEmpty() ? prefix : (prefix + u" - "_q + user);
 		setTitle(appTitle + added);
 		return;
 	}
@@ -882,7 +885,7 @@ void MainWindow::updateTitle() {
 		: !added.isEmpty()
 		? u" \u2013"_q
 		: QString();
-	setTitle(u"Ghostgram - "_q + primary + middle + added);
+	setTitle(prefix + u" - "_q + primary + middle + added);
 }
 
 QRect MainWindow::computeDesktopRect() const {

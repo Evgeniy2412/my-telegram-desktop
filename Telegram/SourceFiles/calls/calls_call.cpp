@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "calls/calls_call.h"
 
+#include "core/ghostgram_settings.h"
 #include "apiwrap.h"
 #include "base/openssl_help.h"
 #include "base/platform/base_platform_info.h"
@@ -353,7 +354,7 @@ void Call::startOutgoing() {
 		MTP_int(base::RandomValue<int32>()),
 		MTP_bytes(_gaHash),
 		MTP_phoneCallProtocol(
-			MTP_flags(MTPDphoneCallProtocol::Flag::f_udp_p2p
+			MTP_flags((Ghost::Settings().forceRelayCalls ? 0 : MTPDphoneCallProtocol::Flag::f_udp_p2p)
 				| MTPDphoneCallProtocol::Flag::f_udp_reflector),
 			MTP_int(kMinLayer),
 			MTP_int(tgcalls::Meta::MaxLayer()),
@@ -487,7 +488,7 @@ void Call::actuallyAnswer() {
 		MTP_inputPhoneCall(MTP_long(_id), MTP_long(_accessHash)),
 		MTP_bytes(_gb),
 		MTP_phoneCallProtocol(
-			MTP_flags(MTPDphoneCallProtocol::Flag::f_udp_p2p
+			MTP_flags((Ghost::Settings().forceRelayCalls ? 0 : MTPDphoneCallProtocol::Flag::f_udp_p2p)
 				| MTPDphoneCallProtocol::Flag::f_udp_reflector),
 			MTP_int(kMinLayer),
 			MTP_int(tgcalls::Meta::MaxLayer()),
@@ -971,7 +972,7 @@ void Call::confirmAcceptedCall(const MTPDphoneCallAccepted &call) {
 		MTP_bytes(_ga),
 		MTP_long(_keyFingerprint),
 		MTP_phoneCallProtocol(
-			MTP_flags(MTPDphoneCallProtocol::Flag::f_udp_p2p
+			MTP_flags((Ghost::Settings().forceRelayCalls ? 0 : MTPDphoneCallProtocol::Flag::f_udp_p2p)
 				| MTPDphoneCallProtocol::Flag::f_udp_reflector),
 			MTP_int(kMinLayer),
 			MTP_int(tgcalls::Meta::MaxLayer()),
@@ -1087,7 +1088,7 @@ void Call::createAndStartController(const MTPDphoneCall &call) {
 				= serverConfig.callConnectTimeoutMs / 1000.,
 			.receiveTimeout = serverConfig.callPacketTimeoutMs / 1000.,
 			.dataSaving = tgcalls::DataSaving::Never,
-			.enableP2P = call.is_p2p_allowed(),
+			.enableP2P = Ghost::Settings().forceRelayCalls ? false : call.is_p2p_allowed(),
 			.enableAEC = false,
 			.enableNS = true,
 			.enableAGC = true,

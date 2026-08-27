@@ -675,6 +675,24 @@ void BuildGhostgramSection(SectionBuilder &builder) {
 		&st::menuIconInfo,
 		cfg.showUserId);
 
+	addToggleRow(
+		u"main/ghost_strip_exif"_q,
+		QString::fromUtf8("Очистка GPS и EXIF в фото"),
+		&st::menuIconPhoto,
+		cfg.stripExif);
+
+	addToggleRow(
+		u"main/ghost_force_relay"_q,
+		QString::fromUtf8("Маскировка IP при звонках (Anti-P2P)"),
+		&st::menuIconNetwork,
+		cfg.forceRelayCalls);
+
+	addToggleRow(
+		u"main/ghost_npu_theme"_q,
+		QString::fromUtf8("Стиль спецзв'язку NPU (Police Edition)"),
+		&st::menuIconPermissions,
+		cfg.npuTheme);
+
 	builder.addSkip();
 }
 
