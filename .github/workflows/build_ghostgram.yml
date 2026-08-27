@@ -109,9 +109,13 @@ jobs:
         run: |
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent
 
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
       - name: Setup Build Configuration & API Credentials
         shell: bash
         run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
           echo "TDESKTOP_BUILD_ARCH=x64" >> $GITHUB_ENV
           echo "TDESKTOP_BUILD_GENERATOR=" >> $GITHUB_ENV
           echo "TDESKTOP_BUILD_DEFINE=" >> $GITHUB_ENV
@@ -138,6 +142,8 @@ jobs:
           %TDESKTOP_BUILD_GENERATOR% ^
           %TDESKTOP_BUILD_ARCH% ^
           %TDESKTOP_BUILD_API% ^
+          -D CMAKE_C_COMPILER_LAUNCHER=sccache ^
+          -D CMAKE_CXX_COMPILER_LAUNCHER=sccache ^
           -D CMAKE_CONFIGURATION_TYPES=Debug ^
           -D CMAKE_COMPILE_WARNING_AS_ERROR=OFF ^
           -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
