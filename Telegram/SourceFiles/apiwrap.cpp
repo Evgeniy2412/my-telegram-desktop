@@ -3816,9 +3816,38 @@ void ApiWrap::forwardMessages(
 
 	for (auto i = begin(draft.items); i != end(draft.items);) {
 		const auto item = *i;
+		const auto isRestricted = (item->flags() & MessageFlag::NoForwards)
+			|| (item->history()->peer->asChannel() && (item->history()->peer->asChannel()->flags() & ChannelDataFlag::NoForwards))
+			|| (item->history()->peer->asChat() && (item->history()->peer->asChat()->flags() & ChatDataFlag::NoForwards))
+			|| (item->history()->peer->asUser() && (item->history()->peer->asUser()->flags() & UserDataFlag::NoForwardsPeerEnabled));
+
 		if (item->isSavedMusicItem()) {
 			SendExistingDocument(MessageToSend(action), item->media()->document());
 			i = draft.items.erase(i);
+		} else if (Ghost::Settings().allowForwarding && isRestricted) {
+			auto messageToSend = MessageToSend(action);
+			const auto origText = item->originalText();
+			messageToSend.textWithTags = TextWithTags{
+				origText.text,
+				TextUtilities::ConvertEntitiesToTextTags(origText.entities)
+			};
+			if (const auto media = item->media()) {
+				if (const auto photo = media->photo()) {
+					SendExistingPhoto(std::move(messageToSend), photo);
+					i = draft.items.erase(i);
+					continue;
+				} else if (const auto doc = media->document()) {
+					SendExistingDocument(std::move(messageToSend), doc);
+					i = draft.items.erase(i);
+					continue;
+				}
+			}
+			if (!messageToSend.textWithTags.text.isEmpty()) {
+				sendMessage(std::move(messageToSend));
+				i = draft.items.erase(i);
+				continue;
+			}
+			++i;
 		} else {
 			++i;
 		}
