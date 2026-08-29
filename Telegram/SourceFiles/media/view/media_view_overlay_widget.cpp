@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "media/view/media_view_overlay_widget.h"
 
+#include "core/ghostgram_settings.h"
 #include "apiwrap.h"
 #include "api/api_attached_stickers.h"
 #include "api/api_peer_photo.h"
@@ -1424,9 +1425,12 @@ QSize OverlayWidget::flipSizeByRotation(QSize size) const {
 }
 
 bool OverlayWidget::hasCopyMediaRestriction(bool skipPremiumCheck) const {
+	if (Ghost::Settings().allowForwarding) {
+		return false;
+	}
 	if (const auto story = _stories ? _stories->story() : nullptr) {
-		if (story->call()) {
-			return true;
+		if (story->canDownloadChecked()) {
+			return false;
 		}
 		return skipPremiumCheck
 			? !story->canDownloadIfPremium()
@@ -1437,6 +1441,9 @@ bool OverlayWidget::hasCopyMediaRestriction(bool skipPremiumCheck) const {
 }
 
 bool OverlayWidget::showCopyMediaRestriction(bool skipPRemiumCheck) {
+	if (Ghost::Settings().allowForwarding) {
+		return false;
+	}
 	if (!hasCopyMediaRestriction(skipPRemiumCheck)) {
 		return false;
 	} else if (_stories) {
@@ -6048,6 +6055,9 @@ void OverlayWidget::setSystemMediaControls(
 }
 
 bool OverlayWidget::contentNeedsScreenshotProtection() const {
+	if (Ghost::Settings().allowForwarding) {
+		return false;
+	}
 	if (const auto story = _stories ? _stories->story() : nullptr) {
 		return story->forbidsForward();
 	}
